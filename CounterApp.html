@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counter Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Counter Management</h1>
+        <div id="alert-message" class="alert" style="display:none;"></div>
+
+        <!-- Form untuk menambah data -->
+        <div class="mb-4">
+            <h3>Add New Counter</h3>
+            <form id="add-counter-form">
+                <div class="form-group">
+                    <label for="token">Token</label>
+                    <input type="text" class="form-control" id="token" placeholder="Enter token" required>
+                </div>
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" class="form-control" id="title" placeholder="Enter title" required>
+                </div>
+                <div class="form-group">
+                    <label for="desc">Description</label>
+                    <textarea class="form-control" id="desc" rows="3" placeholder="Enter description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="number">Number</label>
+                    <input type="number" class="form-control" id="number" placeholder="Enter number">
+                </div>
+                <button type="submit" class="btn btn-primary">Add Counter</button>
+            </form>
+        </div>
+
+        <!-- Form untuk mengupdate data -->
+        <div class="mb-4">
+            <h3>Update Counter</h3>
+            <form id="update-counter-form">
+                <div class="form-group">
+                    <label for="update-id">ID</label>
+                    <input type="number" class="form-control" id="update-id" placeholder="Enter ID" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-token">Token</label>
+                    <input type="text" class="form-control" id="update-token" placeholder="Enter token" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-title">Title</label>
+                    <input type="text" class="form-control" id="update-title" placeholder="Enter title">
+                </div>
+                <div class="form-group">
+                    <label for="update-desc">Description</label>
+                    <textarea class="form-control" id="update-desc" rows="3" placeholder="Enter description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="update-number">Number</label>
+                    <input type="number" class="form-control" id="update-number" placeholder="Enter number">
+                </div>
+                <button type="submit" class="btn btn-primary">Update Counter</button>
+            </form>
+        </div>
+
+        <!-- Form untuk menghapus data -->
+        <div class="mb-4">
+            <h3>Delete Counter</h3>
+            <form id="delete-counter-form">
+                <div class="form-group">
+                    <label for="delete-id">ID</label>
+                    <input type="number" class="form-control" id="delete-id" placeholder="Enter ID" required>
+                </div>
+                <div class="form-group">
+                    <label for="delete-token">Token</label>
+                    <input type="text" class="form-control" id="delete-token" placeholder="Enter token" required>
+                </div>
+                <button type="submit" class="btn btn-danger">Delete Counter</button>
+            </form>
+        </div>
+
+        <!-- Data Counter -->
+        <h3>Counter List</h3>
+        <div id="counter-list"></div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            const baseUrl = 'https://ea25-103-121-16-31.ngrok-free.app/api/counter'; // Ganti dengan URL API Anda jika berbeda
+
+            // Add Counter
+            $('#add-counter-form').on('submit', function (e) {
+                e.preventDefault();
+                const token = $('#token').val();
+                const title = $('#title').val();
+                const desc = $('#desc').val();
+                const number = $('#number').val() || 1;
+
+                $.ajax({
+                  headers: {
+                      'ngrok-skip-browser-warning': 'true'
+                  },
+                    url: `${baseUrl}/${token}`,
+                    method: 'POST',
+                    data: {
+                        title: title,
+                        desc: desc,
+                        number: number
+                    },
+                    success: function (response) {
+                        
+                        $('#alert-message').removeClass('alert-danger').addClass('alert-success').text(response.message).show();
+                        loadCounters();
+                    },
+                    error: function (xhr) {
+                        $('#alert-message').removeClass('alert-success').addClass('alert-danger').text(xhr.responseJSON.message).show();
+                    }
+                });
+            });
+
+            // Update Counter
+            $('#update-counter-form').on('submit', function (e) {
+                e.preventDefault();
+                const id = $('#update-id').val();
+                const token = $('#update-token').val();
+                const title = $('#update-title').val();
+                const desc = $('#update-desc').val();
+                const number = $('#update-number').val();
+
+                $.ajax({
+                        headers: {
+        'ngrok-skip-browser-warning': 'true'
+    },
+                    url: `${baseUrl}/${id}/${token}`,
+                    method: 'PUT',
+                    data: {
+                        title: title,
+                        desc: desc,
+                        number: number
+                    },
+                    success: function (response) {
+                        $('#alert-message').removeClass('alert-danger').addClass('alert-success').text(response.message).show();
+                        loadCounters();
+                    },
+                    error: function (xhr) {
+                        $('#alert-message').removeClass('alert-success').addClass('alert-danger').text(xhr.responseJSON.message).show();
+                    }
+                });
+            });
+
+            // Delete Counter
+            $('#delete-counter-form').on('submit', function (e) {
+                e.preventDefault();
+                const id = $('#delete-id').val();
+                const token = $('#delete-token').val();
+
+                $.ajax({
+                        headers: {
+        'ngrok-skip-browser-warning': 'true'
+    },
+                    url: `${baseUrl}/${id}/${token}`,
+                    method: 'DELETE',
+                    success: function (response) {
+                        $('#alert-message').removeClass('alert-danger').addClass('alert-success').text(response.message).show();
+                        loadCounters();
+                    },
+                    error: function (xhr) {
+                        $('#alert-message').removeClass('alert-success').addClass('alert-danger').text(xhr.responseJSON.message).show();
+                    }
+                });
+            });
+
+            // Load Counters
+            function loadCounters() {
+                $.ajax({
+                        headers: {
+        'ngrok-skip-browser-warning': 'true'
+    },
+                    url: `${baseUrl}/3fbb363ff52955cdeae327978b6c3d2b02c72797748148999a64fc37b520a748`,
+                    method: 'GET',
+                    success: function (response) {
+                      console.log(response);
+                        let html = '<ul class="list-group">';
+                        response.data.forEach(counter => {
+                            html += `<li class="list-group-item">
+                                <strong>ID:</strong> ${counter.id} <br>
+                                <strong>Title:</strong> ${counter.title} <br>
+                                <strong>Description:</strong> ${counter.desc} <br>
+                                <strong>Number:</strong> ${counter.number} <br>
+                                <strong>Token:</strong> ${counter.token}
+                            </li>`;
+                        });
+                        html += '</ul>';
+                        $('#counter-list').html(html);
+                    },
+                    error: function (xhr) {
+                        $('#counter-list').html('<p class="text-danger">Failed to load counters.</p>');
+                    }
+                });
+            }
+
+            // Initial load
+            loadCounters();
+        });
+    </script>
+</body>
+</html>

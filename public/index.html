@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="assets/CSS/output.css">
+  <!-- <link rel="stylesheet" href="assets/CSS/suport.css"> -->
+  <!-- npx tailwindcss -i ./src/input.css -o ./public/assets/css/output.css --watch -->
+</head>
+
+<body>
+  <div class='main'>
+    <div class="gradient"></div>
+  </div>
+  <main class='app'>
+    <nav class='flex-between w-full mb-16 pt-3'>
+      <a href="#" class="flex gap-2 flex-center">
+        <img src="assets/images/logo.svg" alt="promptopia Logo" width="30px" height="30px" class="object-contain" />
+        <p class='logo_text'>CounterApp</p>
+      </a>
+
+      <div class="sm:flex hidden">
+        <div class='flex gap-3 md:gap-5'>
+          <a href='form.html' class='black_btn'>
+            Create Post
+          </a>
+
+          <a href='/profile' class=''>
+            <img src="assets/images/logo.svg" alt="Profile" width="37px" height="37px"
+              class="rounded-full object-contain" />
+          </a>
+        </div>
+      </div>
+
+      <div class="sm:hidden flex relative">
+        <div class='flex'>
+            <img
+              src="assets/images/logo.svg"
+              alt="Profile"
+              width="37px"
+              height="37px"
+              class="rounded-full object-contain"
+              onClick="setToggleDropdown()"
+            />
+            <div class="hidden" id="Dropdown">
+              <div class="dropdown">
+                <a href='#' class='dropdown_link'>
+                  My Profile
+                </a>
+                <a href='form.html' class='dropdown_link'>
+                  Create Prompt
+                </a>
+                <button 
+                  type='button' 
+                  onClick="setToggleDropdown()"
+                  class='outline_btn mt-5 w-full black_btn'
+                >
+                  X
+                </button>
+              </div>
+            </div>
+          </div>
+      </div>
+    </nav>
+
+    <section class="w-full flex-center flex-col">
+      <h1 class="head_text text-center">
+        Rencanakan Dan Buat
+        <br class="max-md:hidden" />
+        <span class="orange_gradient text-center">Catatan Countermu!</span>
+      </h1>
+      <p class="desc text-center">CounterApp adalah aplikasi website untuk Pencatatan digital dilengkapi dengan counter
+        digit untuk anda</p>
+
+
+      <section class='feed'>
+        <form class='relative w-full'>
+          <input type="text" id="baseUrl" placeholder='baseUrl Api' required class="search_input peer"
+            value="http://127.0.0.1:8001/api/counter" />
+          <input type="text" id="token" placeholder='Token Payload' required class="search_input peer"
+            value="3f71b59ca0aa3723a078d0edfa3d417916fef7e2d625dd5e0af0f12375dc1793" />
+        </form>
+        <button type='button' onclick="loadPage()"
+          class='px-5 py-1.5 text-sm bg-primary-orange rounded-full text-white mt-5'>
+          Refresh Site
+        </button>
+
+        <div class="mt-16 prompt_layout" id="card_loop">
+          <!-- card.js -->
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="assets/js/jquery.js"></script>
+
+  <script src="app/session.js"></script>
+  <script src="app/counter/card.js"></script>
+  <script>
+    let INITVAL;
+    const loadPage = () => {
+      setInitValue()
+      INITVAL = settings.get()
+
+
+      getAllCard()
+    }
+
+    const setToggleDropdown = () => {
+      if($('#Dropdown').hasClass("hidden")) $('#Dropdown').removeClass("hidden")
+      else $('#Dropdown').addClass("hidden")
+    }
+
+    const setInitValue = () => {
+      let baseUrl = $("#baseUrl").val()
+      let token = $("#token").val()      
+      settings.set(baseUrl, token)
+    }
+
+    const getAllCard = () => {
+      $.ajax({
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        },
+        url: `${INITVAL.baseUrl}/${INITVAL.token}`,
+        method: 'GET',
+        beforeSend: function () {
+
+        },
+        success: function (response) {
+          $("#card_loop").empty()
+          if (response.success) {
+            response.data.forEach((item) => {
+              const html = card(item)
+              $("#card_loop").append(html)
+            })
+          }
+        },
+        error: function (xhr) {
+          console.log(xhr)
+        }
+      });
+    }
+
+
+
+    loadPage()
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="assets/css/output.css">
+  <!-- <a rel="stylesheet" href="assets/CSS/suport.css"> -->
+  <!-- npx tailwindcss -i ./src/input.css -o ./public/assets/css/output.css --watch -->
+</head>
+
+<body>
+  <div class='main'>
+    <div class="gradient"></div>
+  </div>
+  <main class='app'>
+    <section class="w-full max-w-full flex-start flex-col">
+      <h1 class="head_text text-left">
+        <span class="blue_gradient">
+          Buat Memo
+        </span>
+      </h1>
+      <p class="desc text-left max-w-md">Buat Catatan Sehari hari Apapun di CounterApp</p>
+
+      <form class="mt-10 w-full max-w-2xl flex flex-col gap-7 glassmorphism">
+        <label>
+          <span class="font-satoshi font-semibold text-base text-gray-700">
+            Judul
+          </span>
+          <input id="title" value="" required class="form_input" />
+        </label>
+        <label>
+          <span class="font-satoshi font-semibold text-base text-gray-700">Counter</span>
+          <div class="flex gap-4">
+            <input type="number" id="number" value="1" class="form_input_big" />
+          </div>
+        </label>
+
+        <div class="flex-end mx-3 mb-5 gap-4">
+          <a href="index.html" class="text-gray-500 text-sm">
+            Cancel
+          </a>
+
+          <button type="submit" id="add-counter-form"
+            class="px-5 py-1.5 text-sm bg-primary-orange rounded-full text-white">
+            Send !
+          </button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+
+  <script src="assets/js/jquery.js"></script>
+  <script src="app/session.js"></script>
+  <script>
+    let INITVAL;
+    let ISEDITING = false;
+    let id;
+    const loadPage = () => {
+      INITVAL = settings.get()
+      getId()
+      getData()
+
+    }
+    loadPage();
+
+    function getId() {
+      let urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('id')) {
+        id = urlParams.get('id')
+        ISEDITING = true
+        return id
+      }
+      return false
+    }
+
+    function getData() {
+      if (ISEDITING) {
+        $.ajax({
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          },
+          url: `${INITVAL.baseUrl}/${INITVAL.token}/${id}`,
+          method: 'GET',
+          success: function (response) {
+            if (response.success) {
+              $('#title').val(response.data.title)
+              $('#number').val(response.data.number)
+            }
+          },
+          error: function (xhr) {
+            console.log(xhr)
+          }
+        });
+      }
+    }
+
+    $('#add-counter-form').on('click', function (e) {
+      e.preventDefault();
+      let url = `${INITVAL.baseUrl}/${INITVAL.token}`
+      let method = "POST"
+
+      if (ISEDITING) {
+        url = `${INITVAL.baseUrl}/${INITVAL.token}/${id}`
+        method = "PUT"
+      }
+
+      $.ajax({
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        },
+        url: url,
+        method: 'POST',
+        data: {
+          _method: method,
+          title: $('#title').val(),
+          number: $('#number').val() || 1
+        },
+        beforeSend: function () {
+
+        },
+        success: function (response) {
+          if (response.success) {
+            window.location.href = "index.html"
+          }
+        },
+        error: function (xhr) {
+          console.log(xhr)
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
